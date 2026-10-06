@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NoMore Errors | Asistente de Windows</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="NoMore Errors inicio">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span>NoMore Errors</span>
+      </a>
+      <span class="status"><span class="status-dot"></span>Asistente de Windows</span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">Diagnóstico sencillo</p>
+      <h1 id="page-title">¿Qué está pasando con tu equipo?</h1>
+      <p class="lede">Escribe el código del error o sube una captura. Te ayudaremos a encontrar el siguiente paso.</p>
+    </section>
+
+    <section class="workspace" aria-label="Identificar error">
+      <form id="error-form" class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">01 / Identifica</p>
+            <h2>Cuéntanos qué ves</h2>
+          </div>
+          <span class="panel-icon" aria-hidden="true">+</span>
+        </div>
+
+        <label class="field-label" for="error-code">Código o nombre del error</label>
+        <div class="input-wrap">
+          <span aria-hidden="true">⌕</span>
+          <input id="error-code" name="error-code" type="text" placeholder="Ej. 0x80070002" autocomplete="off">
+        </div>
+
+        <div class="divider"><span>o añade una imagen</span></div>
+
+        <label id="drop-zone" class="drop-zone" for="image-file" tabindex="0">
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <span class="drop-title">Arrastra una captura aquí</span>
+          <span class="drop-hint">PNG, JPG o WEBP · máximo 5 MB</span>
+          <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden>
+        </label>
+        <p id="file-name" class="file-name" aria-live="polite"></p>
+
+        <button class="primary-button" type="submit">
+          <span>Buscar solución</span>
+          <span aria-hidden="true">↗</span>
+        </button>
+        <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <aside class="side-note">
+        <span class="note-number">02</span>
+        <h2>Sin tecnicismos innecesarios</h2>
+        <p>Primero identificamos el problema. Después recibirás una explicación clara y pasos que puedas seguir.</p>
+        <div class="note-line"></div>
+        <p class="privacy-note">Tus imágenes se procesan para extraer el texto del error.</p>
+      </aside>
+    </section>
+
+    <section id="result" class="result-panel" aria-live="polite" hidden>
+      <div class="result-label">Resultado de identificación</div>
+      <h2 id="result-title"></h2>
+      <p id="result-summary"></p>
+      <div id="probable-causes" class="probable-causes"></div>
+      <div id="detected-errors" class="detected-errors"></div>
+      <ol id="result-steps" class="solution-steps"></ol>
+      <div class="feedback" aria-labelledby="feedback-title">
+        <div>
+          <p id="feedback-title" class="feedback-title">¿Te sirvió esta solución?</p>
+          <p id="effectiveness" class="effectiveness">Todavía no hay votos.</p>
+        </div>
+        <div class="feedback-actions">
+          <button id="feedback-yes" class="feedback-button" type="button">Sí, funcionó</button>
+          <button id="feedback-no" class="feedback-button" type="button">No me sirvió</button>
+        </div>
+        <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <footer>Fase 4 · Feedback y efectividad de soluciones</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+{
+  "version": 1,
+  "errors": [
+    {
+      "code": "0X80070002",
+      "title": "Archivo o ruta no encontrada",
+      "simple_explanation": "Windows o una aplicación no encuentra un archivo o una ruta que necesita.",
+      "probable_causes": ["La ruta configurada ya no existe.", "Una actualización dejó archivos incompletos.", "La aplicación apunta a una unidad desconectada."],
+      "steps": [
+        {"number": 1, "title": "Comprueba la ruta", "detail": "Copia la ruta del mensaje y ábrela en el Explorador de archivos. Verifica también que la unidad externa esté conectada.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Repara la imagen de Windows", "detail": "Abre Terminal de Windows como administrador y espera a que finalice.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth"},
+        {"number": 3, "title": "Repara archivos protegidos", "detail": "En la misma terminal de administrador, ejecuta esta comprobación después de DISM.", "tipo": "terminal", "comando": "sfc /scannow"},
+        {"number": 4, "title": "Reinicia Windows", "detail": "Guarda tu trabajo y reinicia para aplicar las reparaciones.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X80070005",
+      "title": "Acceso denegado",
+      "simple_explanation": "Windows rechaza la acción porque la aplicación o tu cuenta no tiene permisos suficientes.",
+      "probable_causes": ["La aplicación necesita permisos elevados.", "La carpeta pertenece a otra cuenta.", "Una política de seguridad bloquea la operación."],
+      "steps": [
+        {"number": 1, "title": "Comprueba el programa", "detail": "Confirma que el archivo procede de una fuente confiable antes de cambiar permisos.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Ejecuta como administrador", "detail": "En el Explorador, haz clic derecho en el programa y elige Más > Ejecutar como administrador.", "tipo": "configuracion", "comando": null},
+        {"number": 3, "title": "Revisa la carpeta afectada", "detail": "Haz clic derecho en la carpeta > Propiedades > Seguridad y confirma permisos de lectura y ejecución. No otorgues Control total a todo el disco.", "tipo": "configuracion", "comando": null},
+        {"number": 4, "title": "Vuelve a probar", "detail": "Abre la aplicación de nuevo y repite la acción que produjo el error.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0X80244007",
+      "title": "Windows Update no pudo procesar la solicitud",
+      "simple_explanation": "El cliente de Windows Update no pudo procesar los metadatos del servidor. Suele estar relacionado con la caché de actualización, un proxy o componentes detenidos.",
+      "probable_causes": ["Caché de Windows Update dañada.", "Proxy o red corporativa que interrumpe la petición.", "Servicios BITS o Windows Update detenidos."],
+      "steps": [
+        {"number": 1, "title": "Comprueba el proxy", "detail": "Abre Terminal como administrador y comprueba si Windows usa un proxy que ya no existe.", "tipo": "terminal", "comando": "netsh winhttp show proxy"},
+        {"number": 2, "title": "Detén los componentes", "detail": "En Terminal de Windows como administrador, detén temporalmente los servicios de actualización.", "tipo": "terminal", "comando": "cmd.exe /c \"net stop wuauserv && net stop bits && net stop cryptsvc\""},
+        {"number": 3, "title": "Renueva la caché", "detail": "Renombra estas carpetas para que Windows las cree de nuevo. No borres las carpetas originales.", "tipo": "terminal", "comando": "cmd.exe /c \"ren %windir%\\SoftwareDistribution SoftwareDistribution.old && ren %windir%\\System32\\catroot2 catroot2.old\""},
+        {"number": 4, "title": "Inicia los servicios", "detail": "Vuelve a iniciar los servicios y después busca actualizaciones en Configuración > Windows Update.", "tipo": "terminal", "comando": "cmd.exe /c \"net start wuauserv && net start bits && net start cryptsvc\""},
+        {"number": 5, "title": "Reinicia y actualiza", "detail": "Reinicia el equipo y vuelve a Configuración > Windows Update > Buscar actualizaciones.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0X800F0922",
+      "title": "La actualización no pudo finalizar",
+      "simple_explanation": "Windows no pudo completar una actualización. Puede faltar espacio en la partición reservada del sistema o una conexión VPN puede estar interfiriendo.",
+      "probable_causes": ["Poco espacio en la partición reservada del sistema.", "VPN o conexión que impide contactar con Windows Update.", "Componentes de actualización dañados."],
+      "steps": [
+        {"number": 1, "title": "Desconecta la VPN", "detail": "Cierra la VPN temporalmente, conecta el equipo a una red estable y vuelve a buscar actualizaciones.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Ejecuta el solucionador", "detail": "Ve a Configuración > Sistema > Solucionar problemas > Otros solucionadores > Windows Update > Ejecutar.", "tipo": "configuracion", "comando": null},
+        {"number": 3, "title": "Repara componentes", "detail": "En Terminal como administrador, ejecuta DISM y después SFC.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"},
+        {"number": 4, "title": "Reintenta la actualización", "detail": "Reinicia y vuelve a Configuración > Windows Update. No borres manualmente particiones del sistema.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0X80073712",
+      "title": "Almacén de componentes dañado",
+      "simple_explanation": "Faltan o están dañados componentes que Windows necesita para instalar una actualización.",
+      "probable_causes": ["Corrupción del almacén de componentes.", "Apagado inesperado durante una actualización.", "Archivos de sistema incompletos."],
+      "steps": [
+        {"number": 1, "title": "Repara el almacén", "detail": "Abre Terminal como administrador y deja que DISM termine aunque el porcentaje parezca detenido.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth"},
+        {"number": 2, "title": "Comprueba Windows", "detail": "Después de DISM, verifica los archivos protegidos del sistema.", "tipo": "terminal", "comando": "sfc /scannow"},
+        {"number": 3, "title": "Reinicia", "detail": "Reinicia el equipo y repite Windows Update.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X800F081F",
+      "title": "No se encontraron archivos de origen",
+      "simple_explanation": "Windows no encuentra los archivos necesarios para reparar una característica o componente.",
+      "probable_causes": ["La imagen local de Windows no contiene el origen.", "La instalación usa una versión distinta del medio de reparación.", "La conexión al servicio de Windows Update está bloqueada."],
+      "steps": [
+        {"number": 1, "title": "Revisa la conexión", "detail": "Desactiva temporalmente una VPN y comprueba que Windows Update no esté bloqueado por un proxy.", "tipo": "configuracion", "comando": "netsh winhttp show proxy"},
+        {"number": 2, "title": "Intenta reparar en línea", "detail": "En Terminal como administrador, ejecuta DISM para usar los componentes disponibles en Windows Update.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth"},
+        {"number": 3, "title": "Comprueba los archivos", "detail": "Ejecuta SFC después de que DISM termine.", "tipo": "terminal", "comando": "sfc /scannow"}
+      ]
+    },
+    {
+      "code": "0X80070422",
+      "title": "Servicio de Windows Update deshabilitado",
+      "simple_explanation": "Un servicio necesario para Windows Update está detenido o deshabilitado.",
+      "probable_causes": ["El servicio Windows Update está detenido.", "Una herramienta de optimización cambió el inicio del servicio.", "Una política de empresa controla las actualizaciones."],
+      "steps": [
+        {"number": 1, "title": "Abre Servicios", "detail": "Pulsa Win + R, escribe services.msc y busca Windows Update.", "tipo": "configuracion", "comando": "services.msc"},
+        {"number": 2, "title": "Activa Windows Update", "detail": "Abre Windows Update > Propiedades, establece Tipo de inicio en Manual o Automático y pulsa Iniciar.", "tipo": "configuracion", "comando": null},
+        {"number": 3, "title": "Busca actualizaciones", "detail": "Ve a Configuración > Windows Update > Buscar actualizaciones.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0X80072EFE",
+      "title": "Conexión interrumpida con el servidor",
+      "simple_explanation": "La conexión entre Windows Update y el servidor se cerró antes de terminar.",
+      "probable_causes": ["Red inestable.", "Proxy, VPN o firewall inspeccionando la conexión.", "Interrupción temporal del servidor."],
+      "steps": [
+        {"number": 1, "title": "Prueba otra red", "detail": "Conecta el equipo a una red estable y desactiva temporalmente la VPN si la usas.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Limpia la pila de red", "detail": "Abre Terminal como administrador y ejecuta estos comandos; después reinicia.", "tipo": "terminal", "comando": "ipconfig /flushdns && netsh winsock reset"},
+        {"number": 3, "title": "Reintenta Windows Update", "detail": "Después del reinicio, abre Configuración > Windows Update y vuelve a intentarlo.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0X80072EE2",
+      "title": "Tiempo de espera agotado",
+      "simple_explanation": "Windows Update no recibió respuesta del servidor dentro del tiempo esperado.",
+      "probable_causes": ["Red lenta o saturada.", "Proxy o firewall bloqueando la petición.", "Servidor de actualización temporalmente ocupado."],
+      "steps": [
+        {"number": 1, "title": "Comprueba la red", "detail": "Cierra descargas, conecta el equipo a una red estable y revisa que la fecha y hora sean automáticas.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Reinicia servicios", "detail": "En Terminal como administrador, reinicia Windows Update y BITS.", "tipo": "terminal", "comando": "net stop wuauserv && net stop bits && net start bits && net start wuauserv"},
+        {"number": 3, "title": "Vuelve a buscar", "detail": "Espera unos minutos y usa Configuración > Windows Update > Buscar actualizaciones.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0X80070057",
+      "title": "Parámetro incorrecto",
+      "simple_explanation": "Windows recibió un valor o configuración que no puede utilizar.",
+      "probable_causes": ["Configuración de actualización dañada.", "Formato incorrecto en una ruta o archivo.", "Parámetro incompatible de una aplicación."],
+      "steps": [
+        {"number": 1, "title": "Revisa la entrada", "detail": "Comprueba que la ruta, nombre de archivo o valor introducido no tenga caracteres extraños ni espacios finales.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Repara archivos del sistema", "detail": "Ejecuta SFC desde Terminal como administrador.", "tipo": "terminal", "comando": "sfc /scannow"},
+        {"number": 3, "title": "Reinicia la aplicación", "detail": "Cierra completamente la aplicación, reinicia Windows y repite la operación.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X80070070",
+      "title": "Espacio insuficiente",
+      "simple_explanation": "La unidad no tiene suficiente espacio libre para completar la instalación o actualización.",
+      "probable_causes": ["Archivos temporales acumulados.", "Poco espacio en la unidad del sistema.", "Archivos de actualizaciones anteriores."],
+      "steps": [
+        {"number": 1, "title": "Comprueba el espacio", "detail": "Ve a Configuración > Sistema > Almacenamiento y revisa la unidad donde está instalado Windows.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Limpia temporales", "detail": "Abre Configuración > Sistema > Almacenamiento > Archivos temporales y elimina solo categorías que reconozcas.", "tipo": "advertencia", "comando": null},
+        {"number": 3, "title": "Reintenta la instalación", "detail": "Libera varios GB, reinicia el equipo y vuelve a ejecutar Windows Update.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0XC1900101",
+      "title": "Problema con un controlador",
+      "simple_explanation": "La actualización no pudo continuar porque un controlador no migró correctamente.",
+      "probable_causes": ["Controlador antiguo o incompatible.", "Periférico conectado durante la actualización.", "Software de seguridad o virtualización interfiriendo."],
+      "steps": [
+        {"number": 1, "title": "Desconecta periféricos", "detail": "Apaga el equipo y desconecta dispositivos USB no esenciales, impresoras y discos externos.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Actualiza controladores", "detail": "Abre Administrador de dispositivos, busca iconos de advertencia y actualiza desde el fabricante oficial.", "tipo": "configuracion", "comando": "devmgmt.msc"},
+        {"number": 3, "title": "Reinicia la actualización", "detail": "Reinicia y vuelve a ejecutar Windows Update con el equipo conectado a la corriente.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "CRITICAL_PROCESS_DIED",
+      "title": "Proceso crítico detenido",
+      "simple_explanation": "Un proceso esencial de Windows se detuvo y el sistema mostró una pantalla azul para proteger el equipo.",
+      "probable_causes": ["Archivos del sistema dañados.", "Controlador incompatible.", "Problema de almacenamiento o memoria."],
+      "steps": [
+        {"number": 1, "title": "Desconecta accesorios recientes", "detail": "Apaga el equipo y desconecta USB o componentes instalados justo antes del problema.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Entra en modo seguro", "detail": "Ve a Configuración > Sistema > Recuperación > Inicio avanzado > Reiniciar ahora. Elige Solucionar problemas > Opciones avanzadas > Configuración de inicio y pulsa 4.", "tipo": "configuracion", "comando": null},
+        {"number": 3, "title": "Repara Windows", "detail": "En Terminal como administrador, ejecuta DISM y después SFC.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"},
+        {"number": 4, "title": "Instala actualizaciones", "detail": "Abre Configuración > Windows Update y aplica las actualizaciones pendientes.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "SYSTEM_SERVICE_EXCEPTION",
+      "title": "Excepción en un servicio del sistema",
+      "simple_explanation": "Un controlador o componente del sistema provocó una excepción que Windows no pudo recuperar.",
+      "probable_causes": ["Controlador incompatible.", "Archivos del sistema dañados.", "Software de seguridad o virtualización defectuoso."],
+      "steps": [
+        {"number": 1, "title": "Revisa cambios recientes", "detail": "Desinstala desde Aplicaciones cualquier controlador o programa instalado justo antes de que empezara el pantallazo azul.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Actualiza controladores", "detail": "Usa Administrador de dispositivos o la web oficial del fabricante; evita instaladores de controladores desconocidos.", "tipo": "configuracion", "comando": "devmgmt.msc"},
+        {"number": 3, "title": "Comprueba archivos", "detail": "Ejecuta DISM y SFC desde Terminal como administrador.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"}
+      ]
+    },
+    {
+      "code": "IRQL_NOT_LESS_OR_EQUAL",
+      "title": "Acceso de memoria incompatible",
+      "simple_explanation": "Un controlador o componente intentó acceder a memoria de una forma no permitida.",
+      "probable_causes": ["Controlador defectuoso.", "Memoria RAM inestable.", "Configuración reciente de hardware."],
+      "steps": [
+        {"number": 1, "title": "Revierte el último cambio", "detail": "Desconecta hardware reciente o vuelve al controlador anterior desde Administrador de dispositivos.", "tipo": "advertencia", "comando": "devmgmt.msc"},
+        {"number": 2, "title": "Diagnostica la memoria", "detail": "Pulsa Win + R, escribe mdsched.exe y elige reiniciar para comprobar la memoria.", "tipo": "configuracion", "comando": "mdsched.exe"},
+        {"number": 3, "title": "Repara archivos del sistema", "detail": "Ejecuta SFC desde Terminal como administrador.", "tipo": "terminal", "comando": "sfc /scannow"}
+      ]
+    },
+    {
+      "code": "PAGE_FAULT_IN_NONPAGED_AREA",
+      "title": "Error de memoria del sistema",
+      "simple_explanation": "Windows no pudo acceder a una zona de memoria que debía estar disponible.",
+      "probable_causes": ["RAM defectuosa o inestable.", "Controlador incompatible.", "Antivirus o software de bajo nivel interfiriendo."],
+      "steps": [
+        {"number": 1, "title": "Quita cambios recientes", "detail": "Desconecta hardware nuevo y desinstala controladores o programas instalados antes del error.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Comprueba la memoria", "detail": "Pulsa Win + R, escribe mdsched.exe y reinicia para ejecutar el diagnóstico de memoria.", "tipo": "configuracion", "comando": "mdsched.exe"},
+        {"number": 3, "title": "Repara Windows", "detail": "Ejecuta DISM y SFC desde Terminal como administrador.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"}
+      ]
+    },
+    {
+      "code": "DPC_WATCHDOG_VIOLATION",
+      "title": "Controlador tardó demasiado",
+      "simple_explanation": "Windows detectó que un controlador o dispositivo no respondió dentro del tiempo permitido.",
+      "probable_causes": ["Controlador de almacenamiento incompatible.", "Firmware SSD antiguo.", "Dispositivo externo defectuoso."],
+      "steps": [
+        {"number": 1, "title": "Desconecta dispositivos", "detail": "Apaga el equipo y desconecta discos o adaptadores externos no esenciales.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Actualiza almacenamiento", "detail": "Actualiza el controlador y firmware desde la web oficial del fabricante de la placa o SSD.", "tipo": "configuracion", "comando": "devmgmt.msc"},
+        {"number": 3, "title": "Comprueba el disco", "detail": "Ejecuta una comprobación sin reparar automáticamente desde Terminal como administrador.", "tipo": "terminal", "comando": "chkdsk C: /scan"}
+      ]
+    },
+    {
+      "code": "0X800F0831",
+      "title": "Falta un manifiesto de actualización",
+      "simple_explanation": "Windows no puede instalar la actualización porque falta un componente necesario en el almacén de componentes. Normalmente se corrige reparando la imagen y reiniciando Windows Update.",
+      "probable_causes": ["Almacén de componentes dañado o incompleto.", "Una actualización anterior quedó a medias.", "La caché de Windows Update contiene archivos inconsistentes."],
+      "steps": [
+        {"number": 1, "title": "Reinicia el equipo", "detail": "Guarda tu trabajo, reinicia y vuelve a intentar Windows Update una vez. Si vuelve a fallar, continúa con el siguiente paso.", "tipo": "reinicio", "comando": "shutdown /r /t 0"},
+        {"number": 2, "title": "Repara la imagen", "detail": "Abre Terminal de Windows como administrador desde Inicio > escribe Terminal > Ejecutar como administrador y espera a que DISM termine al 100 %.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth"},
+        {"number": 3, "title": "Comprueba archivos protegidos", "detail": "En la misma ventana, ejecuta SFC después de DISM para reparar archivos de Windows.", "tipo": "terminal", "comando": "sfc /scannow"},
+        {"number": 4, "title": "Restablece Windows Update", "detail": "Detén los servicios, renombra la caché y vuelve a iniciarlos desde Terminal como administrador.", "tipo": "terminal", "comando": "cmd.exe /c \"net stop wuauserv && net stop bits && ren %windir%\\SoftwareDistribution SoftwareDistribution.old && net start bits && net start wuauserv\""}
+      ]
+    },
+    {
+      "code": "0X8007000D",
+      "title": "Datos no válidos",
+      "simple_explanation": "Windows recibió datos dañados o con un formato que no puede interpretar durante una instalación o actualización.",
+      "probable_causes": ["Descarga de actualización incompleta.", "Archivos temporales dañados.", "Medio de instalación o paquete incompatible."],
+      "steps": [
+        {"number": 1, "title": "Ejecuta el solucionador", "detail": "Ve a Configuración > Sistema > Solucionar problemas > Otros solucionadores > Windows Update > Ejecutar.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Repara componentes", "detail": "Abre Terminal como administrador y ejecuta DISM seguido de SFC.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"},
+        {"number": 3, "title": "Reintenta la actualización", "detail": "Reinicia y busca la actualización desde Configuración > Windows Update.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X800B0109",
+      "title": "Certificado no confiable",
+      "simple_explanation": "Windows no confía en el certificado usado por un archivo, servidor o instalador.",
+      "probable_causes": ["Fecha y hora incorrectas.", "Certificado caducado o emitido por una autoridad no confiable.", "Inspección HTTPS de un proxy corporativo."],
+      "steps": [
+        {"number": 1, "title": "Corrige fecha y hora", "detail": "Ve a Configuración > Hora e idioma > Fecha y hora, activa Establecer hora automáticamente y pulsa Sincronizar ahora.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Comprueba el origen", "detail": "Descarga el instalador solo desde la web oficial. No instales certificados desconocidos para eliminar el aviso.", "tipo": "advertencia", "comando": null},
+        {"number": 3, "title": "Actualiza Windows", "detail": "Instala las actualizaciones pendientes para renovar certificados raíz confiables.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0X80070490",
+      "title": "Elemento no encontrado",
+      "simple_explanation": "Windows no encuentra un componente de sistema que una función o actualización necesita.",
+      "probable_causes": ["Archivos del almacén de componentes dañados.", "Servicio de Windows Update inconsistente.", "Perfil o configuración del sistema alterada."],
+      "steps": [
+        {"number": 1, "title": "Repara Windows", "detail": "Abre Terminal como administrador y deja que DISM repare el almacén de componentes.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth"},
+        {"number": 2, "title": "Verifica archivos", "detail": "Ejecuta SFC en la misma terminal cuando DISM haya finalizado.", "tipo": "terminal", "comando": "sfc /scannow"},
+        {"number": 3, "title": "Reinicia y prueba", "detail": "Reinicia y vuelve a abrir la función que producía el error.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X80240034",
+      "title": "Descarga de actualización incompleta",
+      "simple_explanation": "Windows Update no pudo descargar o ensamblar todos los archivos de una actualización.",
+      "probable_causes": ["Caché de actualización incompleta.", "Conexión interrumpida durante la descarga.", "Espacio libre insuficiente."],
+      "steps": [
+        {"number": 1, "title": "Comprueba espacio y red", "detail": "Ve a Configuración > Sistema > Almacenamiento y usa una conexión estable sin VPN durante la descarga.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Limpia la descarga", "detail": "En Terminal como administrador, detén Windows Update y renombra SoftwareDistribution para que Windows cree una caché nueva.", "tipo": "terminal", "comando": "cmd.exe /c \"net stop wuauserv && ren %windir%\\SoftwareDistribution SoftwareDistribution.old && net start wuauserv\""},
+        {"number": 3, "title": "Busca de nuevo", "detail": "Reinicia y usa Configuración > Windows Update > Buscar actualizaciones.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X80070643",
+      "title": "Fallo durante la instalación",
+      "simple_explanation": "Un instalador MSI o una actualización no pudo completar una operación necesaria.",
+      "probable_causes": ["Instalación anterior dañada.", "Archivos bloqueados o permisos insuficientes.", "Versión incompatible del paquete."],
+      "steps": [
+        {"number": 1, "title": "Reinicia antes de instalar", "detail": "Reinicia Windows para liberar archivos que otro instalador pueda estar usando.", "tipo": "reinicio", "comando": "shutdown /r /t 0"},
+        {"number": 2, "title": "Repara la aplicación", "detail": "Ve a Configuración > Aplicaciones > Aplicaciones instaladas > selecciona la aplicación > Opciones avanzadas > Reparar, si aparece.", "tipo": "configuracion", "comando": null},
+        {"number": 3, "title": "Revisa Windows Update", "detail": "Instala actualizaciones pendientes y ejecuta DISM/SFC desde Terminal como administrador si el fallo continúa.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"}
+      ]
+    },
+    {
+      "code": "0XC1900208",
+      "title": "Aplicación incompatible con la actualización",
+      "simple_explanation": "El instalador de Windows encontró una aplicación o controlador que no puede coexistir con la actualización.",
+      "probable_causes": ["Antivirus o software de bajo nivel incompatible.", "Controlador antiguo.", "Aplicación bloqueada por la comprobación de compatibilidad."],
+      "steps": [
+        {"number": 1, "title": "Revisa compatibilidad", "detail": "Desinstala temporalmente solo la aplicación que el asistente de actualización marque como incompatible y conserva su instalador oficial.", "tipo": "advertencia", "comando": null},
+        {"number": 2, "title": "Desconecta periféricos", "detail": "Retira USB, impresoras y discos externos no esenciales antes de repetir la actualización.", "tipo": "configuracion", "comando": null},
+        {"number": 3, "title": "Reintenta la actualización", "detail": "Reinicia, conecta el equipo a la corriente y ejecuta Windows Update de nuevo.", "tipo": "reinicio", "comando": null}
+      ]
+    },
+    {
+      "code": "0XC190020E",
+      "title": "Espacio insuficiente para actualizar",
+      "simple_explanation": "El instalador de Windows no tiene espacio libre suficiente para guardar los archivos temporales de la actualización.",
+      "probable_causes": ["Poco espacio en la unidad del sistema.", "Archivos temporales de actualizaciones anteriores.", "Poco espacio en la partición reservada del sistema."],
+      "steps": [
+        {"number": 1, "title": "Libera espacio", "detail": "Ve a Configuración > Sistema > Almacenamiento > Archivos temporales y elimina categorías que reconozcas.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Desconecta unidades externas", "detail": "Retira unidades no esenciales y asegúrate de que la unidad de Windows tenga varios GB libres.", "tipo": "advertencia", "comando": null},
+        {"number": 3, "title": "Reintenta", "detail": "Reinicia y vuelve a Configuración > Windows Update > Buscar actualizaciones.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X80070020",
+      "title": "Archivo en uso por otro proceso",
+      "simple_explanation": "Windows no puede actualizar o modificar un archivo porque otra aplicación lo está usando.",
+      "probable_causes": ["Antivirus o sincronización bloqueando el archivo.", "Otra instalación ejecutándose en segundo plano.", "Servicio de Windows Update ocupado."],
+      "steps": [
+        {"number": 1, "title": "Cierra aplicaciones", "detail": "Guarda tu trabajo y cierra instaladores, editores, clientes de sincronización y aplicaciones que puedan usar la carpeta.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Reinicia Windows Update", "detail": "Abre Terminal como administrador y reinicia el servicio de actualización.", "tipo": "terminal", "comando": "net stop wuauserv && net start wuauserv"},
+        {"number": 3, "title": "Vuelve a intentarlo", "detail": "Reinicia si el archivo sigue bloqueado y ejecuta la actualización antes de abrir otras aplicaciones.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X80070035",
+      "title": "Ruta de red no encontrada",
+      "simple_explanation": "Windows no puede encontrar el equipo, servidor o carpeta compartida de la red.",
+      "probable_causes": ["El equipo remoto está apagado o no comparte la carpeta.", "La detección de redes o el uso compartido están desactivados.", "DNS, firewall o credenciales impiden la conexión."],
+      "steps": [
+        {"number": 1, "title": "Comprueba la dirección", "detail": "Verifica que la ruta use el formato \\\\equipo\\carpeta y que el equipo remoto esté encendido en la misma red.", "tipo": "configuracion", "comando": null},
+        {"number": 2, "title": "Prueba la conectividad", "detail": "Abre Terminal y prueba el nombre o la dirección IP del equipo remoto.", "tipo": "terminal", "comando": "ping NOMBRE_DEL_EQUIPO"},
+        {"number": 3, "title": "Activa detección de redes", "detail": "Ve a Configuración > Red e Internet > Configuración de red avanzada > Configuración de uso compartido avanzado y activa Detección de redes y Uso compartido de archivos e impresoras.", "tipo": "configuracion", "comando": null},
+        {"number": 4, "title": "Vuelve a conectar", "detail": "Reinicia la conexión de red y abre de nuevo la carpeta compartida con credenciales autorizadas.", "tipo": "reinicio", "comando": "ipconfig /flushdns"}
+      ]
+    },
+    {
+      "code": "0X0000001A",
+      "title": "MEMORY_MANAGEMENT",
+      "simple_explanation": "Windows detectó un problema grave al administrar la memoria y detuvo el equipo para protegerlo.",
+      "probable_causes": ["RAM defectuosa o configuración XMP/overclock inestable.", "Controlador que corrompe memoria.", "Archivos de sistema dañados."],
+      "steps": [
+        {"number": 1, "title": "Diagnostica la memoria", "detail": "Pulsa Win + R, escribe mdsched.exe y elige Reiniciar ahora y comprobar si existen problemas.", "tipo": "configuracion", "comando": "mdsched.exe"},
+        {"number": 2, "title": "Revierte overclock", "detail": "Si activaste XMP, overclock o instalaste RAM recientemente, vuelve temporalmente a los valores predeterminados de BIOS/UEFI.", "tipo": "advertencia", "comando": null},
+        {"number": 3, "title": "Repara archivos", "detail": "Abre Terminal como administrador y ejecuta DISM seguido de SFC.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"},
+        {"number": 4, "title": "Reinicia y observa", "detail": "Reinicia y comprueba si el pantallazo azul vuelve a aparecer.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    },
+    {
+      "code": "0X00000050",
+      "title": "PAGE_FAULT_IN_NONPAGED_AREA",
+      "simple_explanation": "Windows intentó acceder a una zona de memoria que debía estar disponible y detuvo el sistema.",
+      "probable_causes": ["RAM defectuosa o inestable.", "Controlador incompatible.", "Antivirus, almacenamiento o archivos del sistema dañados."],
+      "steps": [
+        {"number": 1, "title": "Comprueba la memoria", "detail": "Pulsa Win + R, escribe mdsched.exe y reinicia para ejecutar el diagnóstico de memoria.", "tipo": "configuracion", "comando": "mdsched.exe"},
+        {"number": 2, "title": "Revierte cambios recientes", "detail": "Desconecta hardware nuevo y vuelve al controlador anterior si el error empezó después de una instalación.", "tipo": "advertencia", "comando": null},
+        {"number": 3, "title": "Repara el sistema", "detail": "Abre Terminal como administrador y ejecuta DISM seguido de SFC.", "tipo": "terminal", "comando": "DISM /Online /Cleanup-Image /RestoreHealth && sfc /scannow"},
+        {"number": 4, "title": "Reinicia", "detail": "Reinicia Windows y comprueba si el error vuelve a aparecer con la misma aplicación.", "tipo": "reinicio", "comando": "shutdown /r /t 0"}
+      ]
+    }
+  ]
+}

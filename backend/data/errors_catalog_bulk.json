@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "description": "Índice compacto de 200 códigos Win32 para ampliar cobertura; la explicación final la genera IA.",
+  "ranges": [
+    {
+      "format": "hresult_win32",
+      "start": 208,
+      "end": 408,
+      "ai_required": true,
+      "source": "Win32 system error index"
+    }
+  ]
+}

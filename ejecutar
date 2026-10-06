@@ -1,0 +1,5 @@
+cd "C:\Users\Rodrigo\Desktop\NoMore Errors\backend"
+& "..\.venv\Scripts\python.exe" -m uvicorn main:app --reload --port 8000
+
+cd "C:\Users\Rodrigo\Desktop\NoMore Errors\frontend"
+& "..\.venv\Scripts\python.exe" -m http.server 5500

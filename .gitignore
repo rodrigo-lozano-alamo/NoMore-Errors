@@ -1,0 +1,27 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+
+# Datos generados en ejecución
+backend/data/*.db
+backend/data/*.db-journal
+
+# Proyecto .NET de plantilla (no forma parte de la app)
+NoMore Errors/
+
+# Editor / SO
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
