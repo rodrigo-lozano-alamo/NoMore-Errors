@@ -11,7 +11,7 @@ NoMore Errors convierte un **código de error** o una **captura de pantalla** en
 
 ## Características
 
-- **Guías revisadas**: 15 guías escritas a mano para los errores más comunes de Windows (`frontend/guides.js`). Si el código buscado coincide con una, se muestra directamente sin pasar por la IA.
+- **Guías revisadas**: 100 guías escritas a mano (unos 360 códigos y síntomas reconocidos) en `frontend/guides.js`. Si el código o síntoma buscado coincide con una guía, se muestra directamente sin pasar por la IA; con texto libre se ofrecen primero las guías relacionadas.
 - **OCR de capturas**: extrae el texto con Tesseract y detecta códigos como `0x80070005` o `KERNEL_SECURITY_CHECK_FAILURE`.
 - **Catálogo local de errores**: base de conocimiento propia en JSON con soluciones verificadas.
 - **Contexto de la comunidad**: consulta hilos públicos de Reddit (tratados como datos no confiables).

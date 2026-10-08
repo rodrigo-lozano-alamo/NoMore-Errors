@@ -32,6 +32,7 @@
         <h1 id="page-title">Tu ordenador falla.<br><em>Nosotros te lo explicamos.</em></h1>
         <p class="lede">Escribe el código que aparece en pantalla o sube una captura. Te contamos qué significa y cómo arreglarlo, paso a paso y sin tecnicismos.</p>
         <ul class="hero-points">
+          <li><span aria-hidden="true">✓</span> <strong id="guide-count">60</strong>&nbsp;errores con guía revisada por personas</li>
           <li><span aria-hidden="true">✓</span> Explicaciones en lenguaje sencillo</li>
           <li><span aria-hidden="true">✓</span> Avisos antes de cualquier paso delicado</li>
           <li><span aria-hidden="true">✓</span> Comandos listos para copiar</li>
@@ -45,7 +46,7 @@
         <label class="field-label" for="error-code">Código o nombre del error</label>
         <div class="input-wrap">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="error-code" name="error-code" type="text" placeholder="Ej. 0x80070005" autocomplete="off" spellcheck="false">
+          <input id="error-code" name="error-code" type="text" placeholder="Código o síntoma: 0x80070005, no hay sonido…" autocomplete="off" spellcheck="false">
         </div>
 
         <div class="quick-codes" aria-label="Errores frecuentes">
@@ -53,6 +54,9 @@
           <button type="button" class="chip" data-code="0x80070002">0x80070002</button>
           <button type="button" class="chip" data-code="CRITICAL_PROCESS_DIED">CRITICAL_PROCESS_DIED</button>
           <button type="button" class="chip" data-code="0xc000007b">0xc000007b</button>
+          <button type="button" class="chip chip-symptom" data-code="No hay sonido">No hay sonido</button>
+          <button type="button" class="chip chip-symptom" data-code="Sin Internet">Sin Internet</button>
+          <button type="button" class="chip chip-symptom" data-code="La impresora no imprime">La impresora no imprime</button>
         </div>
 
         <div class="divider"><span>o sube una captura</span></div>
@@ -70,6 +74,7 @@
           <span class="spinner" aria-hidden="true"></span>
         </button>
         <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+        <button id="ask-ai" class="link-button" type="button" hidden>✦ Ninguna encaja: preguntar a la IA</button>
         <p class="privacy-note">Las imágenes solo se usan para leer el texto del error.</p>
       </form>
     </section>
@@ -130,7 +135,12 @@
         </div>
       </div>
       <div id="category-tabs" class="category-tabs" role="group" aria-label="Filtrar por categoría"></div>
+      <div id="related-banner" class="related-banner" hidden>
+        <span></span>
+        <button type="button" class="link-button">Ver todas las guías</button>
+      </div>
       <div id="guide-grid" class="guide-grid"></div>
+      <button id="guide-more" class="more-button" type="button" hidden></button>
       <p id="guide-empty" class="guide-empty" hidden>No hay guías que coincidan. Prueba a buscar el código arriba.</p>
     </section>
 

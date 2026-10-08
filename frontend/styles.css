@@ -50,6 +50,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; scroll-padding-top: 84px; }
 
 body {
@@ -216,6 +217,14 @@ h1 em { color: var(--accent-dark); font-style: italic; }
 .guide-card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
 .guide-card-foot { display: flex; justify-content: space-between; margin-top: auto; padding-top: 8px; color: var(--muted); font-size: 0.78rem; }
 .guide-card-foot span:last-child { color: var(--accent-dark); font-weight: 700; }
+.chip-symptom { font-family: var(--sans); }
+.link-button { display: inline-block; padding: 0; border: 0; color: var(--accent-dark); background: none; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.link-button:hover { color: var(--ink); }
+#ask-ai { margin: 0 0 10px; }
+.related-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; padding: 12px 16px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: var(--surface); font-weight: 700; }
+.related-banner[hidden] { display: none; }
+.more-button { display: block; margin: 22px auto 0; padding: 12px 22px; border: 1.5px solid var(--ink); border-radius: 100px; color: var(--ink); background: transparent; cursor: pointer; font: inherit; font-weight: 800; transition: background 150ms, color 150ms; }
+.more-button:hover { color: var(--paper); background: var(--ink); }
 .guide-empty { padding: 28px; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); text-align: center; }
 
 /* Antes de empezar */

@@ -26,8 +26,15 @@ const guideGrid = document.querySelector("#guide-grid");
 const guideFilter = document.querySelector("#guide-filter");
 const guideEmpty = document.querySelector("#guide-empty");
 const categoryTabs = document.querySelector("#category-tabs");
+const askAiButton = document.querySelector("#ask-ai");
+const guideMore = document.querySelector("#guide-more");
+const relatedBanner = document.querySelector("#related-banner");
+const GUIDE_PAGE_SIZE = 12;
 let currentSolution = null;
 let activeCategory = "todas";
+let relatedQuery = "";
+let showAllGuides = false;
+let forceAi = false;
 
 function showStatus(message) {
   formStatus.textContent = message;
@@ -49,15 +56,96 @@ async function getErrorMessage(response, fallback) {
   }
 }
 
+function stripAccents(value) {
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
 function normalizeCode(value) {
-  return value.trim().toUpperCase().replace(/\s+/g, " ");
+  return stripAccents(value)
+    .toUpperCase()
+    .replace(/\s+/g, " ")
+    .replace(/^(?:ERROR|CODIGO DE ERROR|CODIGO DE DETENCION|STOP CODE)\s*:?\s*/, "")
+    .replace(/[.,;:!?¡¿"'«»]+$/, "")
+    .trim();
+}
+
+// Índice código → guía, con variantes: sin ceros a la izquierda y sin «0x».
+const GUIDE_INDEX = new Map();
+GUIDES.forEach((guide) => {
+  [guide.code, ...guide.aliases].forEach((code) => {
+    const key = normalizeCode(code);
+    GUIDE_INDEX.set(key, guide);
+    if (/^0X[0-9A-F]+$/.test(key)) GUIDE_INDEX.set(key.slice(2), guide);
+  });
+});
+
+function codeVariants(value) {
+  const key = normalizeCode(value);
+  const variants = [key];
+  if (/^[0-9A-F]{8}$/.test(key)) variants.push(`0X${key}`);
+  const shortHex = key.match(/^0X0*([0-9A-F]+)$/);
+  if (shortHex) variants.push(`0X${shortHex[1]}`, `0X${shortHex[1].padStart(8, "0")}`);
+  return variants;
 }
 
 function findGuide(codes) {
-  const wanted = codes.map(normalizeCode);
-  return GUIDES.find((guide) =>
-    [guide.code, ...guide.aliases].some((code) => wanted.includes(normalizeCode(code)))
-  );
+  for (const code of codes) {
+    for (const variant of codeVariants(code)) {
+      if (GUIDE_INDEX.has(variant)) return GUIDE_INDEX.get(variant);
+    }
+  }
+  return null;
+}
+
+// Busca frases de las guías (p. ej. «Código 43») dentro del texto de una captura.
+function findGuideInText(text) {
+  const words = (value) => normalizeCode(value).replace(/[^A-Z0-9_]+/g, " ").trim();
+  const haystack = ` ${words(text)} `;
+  for (const [key, guide] of GUIDE_INDEX) {
+    if (key.length >= 8 && key.includes(" ") && haystack.includes(` ${words(key)} `)) return guide;
+  }
+  return null;
+}
+
+const STOPWORDS = new Set([
+  "que", "con", "los", "las", "del", "una", "uno", "por", "para", "mis", "tiene", "tengo",
+  "esta", "sale", "pasa", "error", "windows", "ordenador", "equipo", "portatil", "cuando",
+  "como", "pero", "muy", "hay", "nada", "funciona", "aparece", "puedo",
+]);
+
+function searchWords(query) {
+  return stripAccents(query.toLowerCase())
+    .split(/[^a-z0-9_.]+/)
+    .filter((word) => word.length >= 3 && !STOPWORDS.has(word));
+}
+
+function guideHaystack(guide) {
+  if (!guide._haystack) {
+    guide._haystack = stripAccents(
+      [guide.title, guide.summary, guide.symptom, guide.keywords, guide.code, ...guide.aliases]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+    );
+  }
+  return guide._haystack;
+}
+
+// Devuelve las guías relacionadas con un texto libre, de más a menos relevante.
+function searchGuides(query) {
+  const words = searchWords(query);
+  if (!words.length) return [];
+  // Con una o dos palabras deben aparecer todas; con más, al menos la mitad.
+  const needed = words.length <= 2 ? words.length : Math.ceil(words.length / 2);
+  return GUIDES
+    .map((guide) => ({ guide, score: words.filter((word) => guideHaystack(guide).includes(word)).length }))
+    .filter(({ score }) => score >= needed)
+    .sort((a, b) => b.score - a.score)
+    .map(({ guide }) => guide);
+}
+
+function looksLikeCode(value) {
+  return /^0x[0-9a-f]{3,}$|^[0-9a-f]{8}$|_|\.dll$/i.test(value.trim());
 }
 
 function renderSteps(steps) {
@@ -268,10 +356,33 @@ dropZone.addEventListener("keydown", (event) => {
   }
 });
 
+function showRelatedGuides(query, guides) {
+  relatedQuery = query;
+  activeCategory = "todas";
+  guideFilter.value = "";
+  renderTabs();
+  renderGuides();
+  document.querySelector("#guias").scrollIntoView({ behavior: "smooth" });
+  showStatus(`Hemos encontrado ${guides.length} guía${guides.length === 1 ? "" : "s"} que pueden ayudarte. Si ninguna encaja, pregunta a la IA.`);
+  askAiButton.hidden = false;
+}
+
+askAiButton.addEventListener("click", () => {
+  forceAi = true;
+  form.requestSubmit();
+});
+
+codeInput.addEventListener("input", () => {
+  askAiButton.hidden = true;
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const code = codeInput.value.trim();
   const file = fileInput.files[0];
+  const skipGuides = forceAi;
+  forceAi = false;
+  askAiButton.hidden = true;
 
   if (!code && !file) {
     showStatus("Escribe un código o selecciona una imagen para continuar.");
@@ -279,12 +390,19 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (code && !file) {
+  if (code && !file && !skipGuides) {
     const guide = findGuide([code]);
     if (guide) {
       showGuide(guide);
       showStatus("Tenemos una guía revisada para este error.");
       return;
+    }
+    if (!looksLikeCode(code)) {
+      const related = searchGuides(code);
+      if (related.length) {
+        showRelatedGuides(code, related);
+        return;
+      }
     }
   }
 
@@ -300,14 +418,14 @@ form.addEventListener("submit", async (event) => {
       const ocrResponse = await fetch(`${API_URL}/api/v1/errors/ocr`, { method: "POST", body });
       if (!ocrResponse.ok) throw new Error(await getErrorMessage(ocrResponse, "No se pudo leer la imagen."));
       ocrResult = await ocrResponse.json();
-      if (!ocrResult.extracted_text || !ocrResult.detected_errors.length) {
-        throw new Error(ocrResult.message || "No encontramos un código claro en la imagen.");
-      }
-      const guide = findGuide(ocrResult.detected_errors);
+      const guide = findGuide(ocrResult.detected_errors) || findGuideInText(ocrResult.extracted_text || "");
       if (guide) {
         showGuide(guide, ocrResult.detected_errors);
         showStatus("Tenemos una guía revisada para este error.");
         return;
+      }
+      if (!ocrResult.extracted_text || !ocrResult.detected_errors.length) {
+        throw new Error(ocrResult.message || "No encontramos un código claro en la imagen.");
       }
       detectedCode = ocrResult.detected_errors[0];
     }
@@ -391,11 +509,9 @@ feedbackYes.addEventListener("click", () => sendFeedback(true, feedbackYes));
 feedbackNo.addEventListener("click", () => sendFeedback(false, feedbackNo));
 
 // Galería de guías revisadas
-function guideMatches(guide, query) {
+function guideMatches(guide, words) {
   if (activeCategory !== "todas" && guide.category !== activeCategory) return false;
-  if (!query) return true;
-  const haystack = [guide.title, guide.summary, guide.code, ...guide.aliases].join(" ").toLowerCase();
-  return haystack.includes(query);
+  return words.every((word) => guideHaystack(guide).includes(word));
 }
 
 function renderGuideCard(guide) {
@@ -443,10 +559,26 @@ function renderGuideCard(guide) {
 }
 
 function renderGuides() {
-  const query = guideFilter.value.trim().toLowerCase();
-  const visible = GUIDES.filter((guide) => guideMatches(guide, query));
-  guideGrid.replaceChildren(...visible.map(renderGuideCard));
+  let visible;
+  if (relatedQuery) {
+    visible = searchGuides(relatedQuery);
+    relatedBanner.querySelector("span").textContent = `Guías relacionadas con «${relatedQuery}»`;
+  } else {
+    const words = stripAccents(guideFilter.value.trim().toLowerCase()).split(/\s+/).filter(Boolean);
+    visible = GUIDES.filter((guide) => guideMatches(guide, words));
+  }
+  relatedBanner.hidden = !relatedQuery;
+
+  const filtered = relatedQuery || guideFilter.value.trim() || activeCategory !== "todas";
+  const limited = !filtered && !showAllGuides && visible.length > GUIDE_PAGE_SIZE;
+  guideGrid.replaceChildren(...(limited ? visible.slice(0, GUIDE_PAGE_SIZE) : visible).map(renderGuideCard));
+  guideMore.hidden = !limited;
+  guideMore.textContent = `Ver las ${visible.length} guías`;
   guideEmpty.hidden = visible.length > 0;
+}
+
+function clearRelated() {
+  relatedQuery = "";
 }
 
 function renderTabs() {
@@ -463,6 +595,7 @@ function renderTabs() {
     count.textContent = total;
     tab.appendChild(count);
     tab.addEventListener("click", () => {
+      clearRelated();
       activeCategory = key;
       renderTabs();
       renderGuides();
@@ -477,7 +610,19 @@ function openGuideFromHash() {
   if (guide) showGuide(guide);
 }
 
-guideFilter.addEventListener("input", renderGuides);
+guideFilter.addEventListener("input", () => {
+  clearRelated();
+  renderGuides();
+});
+guideMore.addEventListener("click", () => {
+  showAllGuides = true;
+  renderGuides();
+});
+relatedBanner.querySelector("button").addEventListener("click", () => {
+  clearRelated();
+  renderGuides();
+});
+document.querySelector("#guide-count").textContent = GUIDES.length;
 window.addEventListener("hashchange", openGuideFromHash);
 renderTabs();
 renderGuides();
