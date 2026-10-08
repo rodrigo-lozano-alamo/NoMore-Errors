@@ -4,10 +4,10 @@ import hashlib
 import json
 import logging
 
+import anthropic
 from fastapi import HTTPException
-from google.genai import errors as genai_errors
 from app.schemas.solutions import SolutionStep
-from app.services.ai_service import synthesize_solution
+from app.services.ai_service import ClaudeRefusalError, synthesize_solution
 from app.services.knowledge_service import get_catalog_entry, search_reddit, search_windows_database
 from app.services.feedback_service import get_effectiveness
 
@@ -59,26 +59,41 @@ def _local_synthesis(error_code: str) -> dict[str, object] | None:
     }
 
 
-def _gemini_http_error(error_code: str, error: Exception) -> HTTPException:
-    """Traduce un fallo de Gemini a un mensaje claro para el usuario."""
+def _ai_http_error(error_code: str, error: Exception) -> HTTPException:
+    """Traduce un fallo de Claude a un mensaje claro para el usuario."""
 
-    if isinstance(error, genai_errors.APIError):
-        logger.warning("Gemini respondió %s para %s: %s", error.code, error_code, error.message)
-        if error.code == 429 or error.code >= 500:
-            return HTTPException(
-                status_code=503,
-                detail="Gemini está saturado en este momento. Inténtalo de nuevo en unos minutos.",
-            )
+    if isinstance(error, anthropic.RateLimitError) or (
+        isinstance(error, anthropic.APIStatusError) and error.status_code >= 500
+    ):
+        logger.warning("Claude respondió %s para %s", error.status_code, error_code)
         return HTTPException(
             status_code=503,
-            detail="No se pudo obtener una síntesis de Gemini. Comprueba GEMINI_API_KEY y GEMINI_MODEL.",
+            detail="Claude está saturado en este momento. Inténtalo de nuevo en unos minutos.",
+        )
+    if isinstance(error, anthropic.APIStatusError):
+        logger.warning("Claude respondió %s para %s: %s", error.status_code, error_code, error.message)
+        return HTTPException(
+            status_code=503,
+            detail="No se pudo obtener una síntesis de Claude. Comprueba ANTHROPIC_API_KEY y NOMORE_CLAUDE_MODEL.",
+        )
+    if isinstance(error, anthropic.APIConnectionError):
+        logger.warning("No se pudo conectar con Claude para %s: %s", error_code, error)
+        return HTTPException(
+            status_code=503,
+            detail="No pudimos conectar con Claude. Inténtalo de nuevo en unos segundos.",
+        )
+    if isinstance(error, ClaudeRefusalError):
+        logger.warning("Claude declinó la solicitud para %s", error_code)
+        return HTTPException(
+            status_code=503,
+            detail="La IA no pudo generar una solución para este error. Prueba a describirlo de otra forma.",
         )
     if isinstance(error, RuntimeError):
-        return HTTPException(status_code=503, detail="Falta GEMINI_API_KEY en el archivo .env.")
-    logger.exception("La síntesis de Gemini falló para %s", error_code, exc_info=error)
+        return HTTPException(status_code=503, detail="Falta ANTHROPIC_API_KEY en el archivo .env.")
+    logger.exception("La síntesis de Claude falló para %s", error_code, exc_info=error)
     return HTTPException(
         status_code=503,
-        detail="Gemini devolvió una respuesta que no pudimos procesar. Inténtalo de nuevo.",
+        detail="Claude devolvió una respuesta que no pudimos procesar. Inténtalo de nuevo.",
     )
 
 
@@ -94,8 +109,8 @@ async def build_solution(error_code: str, error_text: str = "") -> dict[str, obj
     except Exception as error:
         synthesis = _local_synthesis(normalized_code)
         if synthesis is None:
-            raise _gemini_http_error(normalized_code, error) from error
-        logger.warning("Gemini no disponible para %s; se usa la solución del catálogo local.", normalized_code)
+            raise _ai_http_error(normalized_code, error) from error
+        logger.warning("Claude no disponible para %s; se usa la solución del catálogo local.", normalized_code)
         sources_summary = (
             "La IA no está disponible ahora mismo; se muestra la solución verificada "
             "del catálogo local de NoMore Errors."
@@ -108,7 +123,7 @@ async def build_solution(error_code: str, error_text: str = "") -> dict[str, obj
             else "Reddit consultado, sin hilos disponibles"
         )
         local_status = ", ".join(sorted(source_names - {item.source for item in reddit_items}))
-        sources_summary = f"Síntesis consultada a Gemini; {reddit_status}."
+        sources_summary = f"Síntesis consultada a Claude; {reddit_status}."
         if local_status:
             sources_summary += f" Referencia local adicional: {local_status}."
 

@@ -6,7 +6,7 @@ NoMore Errors convierte un **código de error** o una **captura de pantalla** en
 
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?logo=fastapi&logoColor=white)
-![Gemini](https://img.shields.io/badge/IA-Google%20Gemini-4285F4?logo=google&logoColor=white)
+![Claude](https://img.shields.io/badge/IA-Claude-D97757?logo=anthropic&logoColor=white)
 ![Estado](https://img.shields.io/badge/estado-en%20desarrollo-orange)
 
 ## Características
@@ -15,7 +15,7 @@ NoMore Errors convierte un **código de error** o una **captura de pantalla** en
 - **OCR de capturas**: extrae el texto con Tesseract y detecta códigos como `0x80070005` o `KERNEL_SECURITY_CHECK_FAILURE`.
 - **Catálogo local de errores**: base de conocimiento propia en JSON con soluciones verificadas.
 - **Contexto de la comunidad**: consulta hilos públicos de Reddit (tratados como datos no confiables).
-- **Síntesis con IA**: Google Gemini genera pasos numerados, dificultad, riesgo y fuentes. Si la IA no está disponible, se usa la solución del catálogo local.
+- **Síntesis con IA**: Claude (Anthropic) genera pasos numerados, dificultad, riesgo y fuentes. Si la IA no está disponible, se usa la solución del catálogo local.
 - **Feedback "¿Te funcionó?"**: los votos se guardan en SQLite y se muestra el porcentaje de efectividad junto al número de respuestas.
 
 ## Arquitectura
@@ -27,7 +27,7 @@ Frontend estático (HTML/CSS/JS)
 API FastAPI ──► OCR (Tesseract)
             ├─► Catálogo de errores (backend/data/*.json)
             ├─► Reddit (búsqueda pública)
-            ├─► Gemini (síntesis)
+            ├─► Claude (síntesis)
             └─► SQLite (feedback)
 ```
 
@@ -60,7 +60,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r backend\requirements.txt
 
-Copy-Item backend\.env.example backend\.env   # y añade tu GEMINI_API_KEY
+Copy-Item backend\.env.example backend\.env   # y añade tu ANTHROPIC_API_KEY
 ```
 
 Arranca la API (terminal 1):
@@ -85,9 +85,9 @@ Abre <http://127.0.0.1:5500>. La documentación interactiva de la API está en <
 
 | Variable | Descripción |
 | --- | --- |
-| `GEMINI_API_KEY` | Clave de Google Gemini. Sin ella solo se usan las soluciones del catálogo local. |
-| `GEMINI_MODEL` | Modelo principal (por defecto `gemini-3.5-flash`). |
-| `GEMINI_FALLBACK_MODELS` | Modelos alternativos separados por comas. |
+| `ANTHROPIC_API_KEY` | Clave de la API de Claude (Anthropic). Sin ella solo se usan las soluciones del catálogo local. |
+| `NOMORE_CLAUDE_MODEL` | Modelo de Claude (por defecto `claude-opus-5-5`). |
+| `NOMORE_CLAUDE_EFFORT` | Esfuerzo de razonamiento: `low` (por defecto), `medium` o `high`. |
 | `REDDIT_USER_AGENT` | User-Agent para las consultas a Reddit. |
 | `TESSERACT_CMD` | Ruta a `tesseract.exe` si no está en el `PATH`. |
 | `FEEDBACK_DB_PATH` | Ruta de la base SQLite de feedback. |

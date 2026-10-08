@@ -200,7 +200,7 @@ Windows DB  Reddit  OpenAI opcional
 2. Consultar primero `backend/data/errors_catalog.json`, con fichas técnicas y pasos estructurados para errores conocidos.
 3. Si el código no existe en el catálogo, consultar la búsqueda JSON pública de Reddit con `User-Agent`, timeout de 8 segundos y un máximo de cinco publicaciones.
 4. Tratar títulos y textos de Reddit como datos no confiables: no se ejecutan instrucciones encontradas allí y se delimitan antes de enviarlos a la IA.
-5. Para códigos desconocidos, sintetizar mediante Google Gemini cuando existe `GEMINI_API_KEY`, exigiendo causas, rutas de menú, comandos y tipos de paso.
+5. Para códigos desconocidos, sintetizar mediante Claude (Anthropic) cuando existe `ANTHROPIC_API_KEY`, exigiendo causas, rutas de menú, comandos y tipos de paso.
 6. Usar un fallback técnico local si no hay clave, la IA falla o Reddit no está disponible. El frontend nunca muestra la marca interna `simulated`.
 
 ### Contrato `POST /api/v1/solutions/search`
@@ -247,8 +247,8 @@ El archivo está preparado para crecer a miles de entradas sin modificar Python:
 
 ### Configuración
 
-- `GEMINI_API_KEY`: activa la síntesis remota; nunca se guarda en el repositorio.
-- `GEMINI_MODEL`: modelo opcional, por defecto `gemini-3.5-flash`.
+- `ANTHROPIC_API_KEY`: activa la síntesis remota; nunca se guarda en el repositorio.
+- `NOMORE_CLAUDE_MODEL`: modelo opcional, por defecto `claude-opus-5-5`.
 - `REDDIT_USER_AGENT`: identificador descriptivo para la consulta pública de Reddit.
 - `TESSERACT_CMD`: ruta opcional al ejecutable OCR de Windows.
 - `WINDOWS_ERROR_CATALOG_PATH`: ruta opcional a un catálogo JSON ampliado.
@@ -343,8 +343,8 @@ Copy-Item .env.example .env
 4. Edita `backend/.env` y añade solo las variables necesarias:
 
 ```dotenv
-GEMINI_API_KEY=tu_clave_de_gemini
-GEMINI_MODEL=gemini-3.5-flash
+ANTHROPIC_API_KEY=tu_clave_de_anthropic
+NOMORE_CLAUDE_MODEL=claude-opus-5-5
 REDDIT_USER_AGENT=NoMoreErrors/0.1 (contacto: tu-email@example.com)
 TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
 ```
