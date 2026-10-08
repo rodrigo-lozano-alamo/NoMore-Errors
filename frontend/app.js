@@ -110,11 +110,11 @@ function findGuideInText(text) {
 const STOPWORDS = new Set([
   "que", "con", "los", "las", "del", "una", "uno", "por", "para", "mis", "tiene", "tengo",
   "esta", "sale", "pasa", "error", "windows", "ordenador", "equipo", "portatil", "cuando",
-  "como", "pero", "muy", "hay", "nada", "funciona", "aparece", "puedo",
+  "como", "pero", "muy", "hay", "nada", "funciona", "aparece", "puedo", "salen", "sale", "algo", "raro", "existe",
 ]);
 
 function searchWords(query) {
-  return stripAccents(query.toLowerCase())
+  return stripAccents(query.toLowerCase().replace(/ñ/g, " enie "))
     .split(/[^a-z0-9_.]+/)
     .filter((word) => word.length >= 3 && !STOPWORDS.has(word));
 }
