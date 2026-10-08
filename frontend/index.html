@@ -3,89 +3,177 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NoMore Errors | Asistente de Windows</title>
+  <meta name="description" content="Entiende y soluciona errores de Windows con pasos claros y sin tecnicismos.">
+  <title>NoMore Errors | Soluciona errores de Windows</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2317211d'/%3E%3Ctext x='16' y='22' font-size='17' font-family='Georgia' text-anchor='middle' fill='%23fff'%3EN%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <a class="brand" href="/" aria-label="NoMore Errors inicio">
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#" aria-label="NoMore Errors, inicio">
         <span class="brand-mark" aria-hidden="true">N</span>
         <span>NoMore Errors</span>
       </a>
-      <span class="status"><span class="status-dot"></span>Asistente de Windows</span>
-    </header>
+      <nav class="nav" aria-label="Secciones">
+        <a href="#buscar">Buscar error</a>
+        <a href="#guias">Errores comunes</a>
+        <a href="#antes">Antes de empezar</a>
+      </nav>
+    </div>
+  </header>
 
-    <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow">Diagnóstico sencillo</p>
-      <h1 id="page-title">¿Qué está pasando con tu equipo?</h1>
-      <p class="lede">Escribe el código del error o sube una captura. Te ayudaremos a encontrar el siguiente paso.</p>
-    </section>
+  <main id="main" class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Asistente para Windows 10 y 11</p>
+        <h1 id="page-title">Tu ordenador falla.<br><em>Nosotros te lo explicamos.</em></h1>
+        <p class="lede">Escribe el código que aparece en pantalla o sube una captura. Te contamos qué significa y cómo arreglarlo, paso a paso y sin tecnicismos.</p>
+        <ul class="hero-points">
+          <li><span aria-hidden="true">✓</span> Explicaciones en lenguaje sencillo</li>
+          <li><span aria-hidden="true">✓</span> Avisos antes de cualquier paso delicado</li>
+          <li><span aria-hidden="true">✓</span> Comandos listos para copiar</li>
+        </ul>
+      </div>
 
-    <section class="workspace" aria-label="Identificar error">
-      <form id="error-form" class="panel">
-        <div class="panel-heading">
-          <div>
-            <p class="panel-kicker">01 / Identifica</p>
-            <h2>Cuéntanos qué ves</h2>
-          </div>
-          <span class="panel-icon" aria-hidden="true">+</span>
-        </div>
+      <form id="error-form" class="search-card" aria-labelledby="search-title">
+        <div id="buscar" class="anchor"></div>
+        <h2 id="search-title">Busca tu error</h2>
 
         <label class="field-label" for="error-code">Código o nombre del error</label>
         <div class="input-wrap">
-          <span aria-hidden="true">⌕</span>
-          <input id="error-code" name="error-code" type="text" placeholder="Ej. 0x80070002" autocomplete="off">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="error-code" name="error-code" type="text" placeholder="Ej. 0x80070005" autocomplete="off" spellcheck="false">
         </div>
 
-        <div class="divider"><span>o añade una imagen</span></div>
+        <div class="quick-codes" aria-label="Errores frecuentes">
+          <span>Frecuentes:</span>
+          <button type="button" class="chip" data-code="0x80070002">0x80070002</button>
+          <button type="button" class="chip" data-code="CRITICAL_PROCESS_DIED">CRITICAL_PROCESS_DIED</button>
+          <button type="button" class="chip" data-code="0xc000007b">0xc000007b</button>
+        </div>
+
+        <div class="divider"><span>o sube una captura</span></div>
 
         <label id="drop-zone" class="drop-zone" for="image-file" tabindex="0">
-          <span class="upload-icon" aria-hidden="true">↑</span>
-          <span class="drop-title">Arrastra una captura aquí</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4.5 4.5M12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          <span class="drop-title">Arrastra la imagen o haz clic</span>
           <span class="drop-hint">PNG, JPG o WEBP · máximo 5 MB</span>
           <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden>
         </label>
         <p id="file-name" class="file-name" aria-live="polite"></p>
 
         <button class="primary-button" type="submit">
-          <span>Buscar solución</span>
-          <span aria-hidden="true">↗</span>
+          <span class="button-label">Buscar solución</span>
+          <span class="spinner" aria-hidden="true"></span>
         </button>
         <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+        <p class="privacy-note">Las imágenes solo se usan para leer el texto del error.</p>
       </form>
-
-      <aside class="side-note">
-        <span class="note-number">02</span>
-        <h2>Sin tecnicismos innecesarios</h2>
-        <p>Primero identificamos el problema. Después recibirás una explicación clara y pasos que puedas seguir.</p>
-        <div class="note-line"></div>
-        <p class="privacy-note">Tus imágenes se procesan para extraer el texto del error.</p>
-      </aside>
     </section>
 
-    <section id="result" class="result-panel" aria-live="polite" hidden>
-      <div class="result-label">Resultado de identificación</div>
-      <h2 id="result-title"></h2>
-      <p id="result-summary"></p>
+    <section id="result" class="result-panel" aria-live="polite" tabindex="-1" hidden>
+      <div class="result-head">
+        <div>
+          <div class="result-meta">
+            <span id="result-source" class="source-badge"></span>
+            <span id="result-level" class="meta-pill" hidden></span>
+            <span id="result-time" class="meta-pill" hidden></span>
+          </div>
+          <h2 id="result-title"></h2>
+          <div id="detected-errors" class="detected-errors"></div>
+        </div>
+        <button id="result-close" class="ghost-button" type="button" aria-label="Cerrar la solución">✕</button>
+      </div>
+
+      <div class="explain-box">
+        <h3>¿Qué está pasando?</h3>
+        <p id="result-summary"></p>
+      </div>
+
       <div id="probable-causes" class="probable-causes"></div>
-      <div id="detected-errors" class="detected-errors"></div>
+
+      <h3 class="steps-title">Cómo solucionarlo</h3>
       <ol id="result-steps" class="solution-steps"></ol>
+
+      <div id="result-help" class="help-box" hidden>
+        <strong>Si nada de esto funciona</strong>
+        <p></p>
+      </div>
+      <p id="result-sources" class="result-sources"></p>
+
       <div class="feedback" aria-labelledby="feedback-title">
         <div>
           <p id="feedback-title" class="feedback-title">¿Te sirvió esta solución?</p>
           <p id="effectiveness" class="effectiveness">Todavía no hay votos.</p>
         </div>
         <div class="feedback-actions">
-          <button id="feedback-yes" class="feedback-button" type="button">Sí, funcionó</button>
-          <button id="feedback-no" class="feedback-button" type="button">No me sirvió</button>
+          <button id="feedback-yes" class="feedback-button" type="button">👍 Sí, funcionó</button>
+          <button id="feedback-no" class="feedback-button" type="button">👎 No me sirvió</button>
         </div>
         <p id="feedback-status" class="feedback-status" role="status" aria-live="polite"></p>
       </div>
     </section>
 
-    <footer>Fase 4 · Feedback y efectividad de soluciones</footer>
+    <section id="guias" class="guides" aria-labelledby="guides-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Guías revisadas</p>
+          <h2 id="guides-title">Los errores más comunes de Windows</h2>
+          <p class="section-lede">Guías escritas por el equipo de NoMore Errors. Elige una para ver la explicación y los pasos.</p>
+        </div>
+        <div class="input-wrap guide-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="guide-filter" type="search" placeholder="Filtrar guías…" aria-label="Filtrar guías">
+        </div>
+      </div>
+      <div id="category-tabs" class="category-tabs" role="group" aria-label="Filtrar por categoría"></div>
+      <div id="guide-grid" class="guide-grid"></div>
+      <p id="guide-empty" class="guide-empty" hidden>No hay guías que coincidan. Prueba a buscar el código arriba.</p>
+    </section>
+
+    <section id="antes" class="basics" aria-labelledby="basics-title">
+      <p class="eyebrow">Antes de empezar</p>
+      <h2 id="basics-title">Tres cosas que conviene saber</h2>
+      <div class="basics-grid">
+        <article class="basic-card">
+          <span class="basic-number">1</span>
+          <h3>Abrir la Terminal como administrador</h3>
+          <p>Muchos pasos usan comandos. Para ejecutarlos:</p>
+          <ol>
+            <li>Haz clic derecho en el botón <kbd>Inicio</kbd>.</li>
+            <li>Elige <strong>Terminal (Administrador)</strong>. En Windows 10 se llama <strong>Windows PowerShell (Administrador)</strong>.</li>
+            <li>Pulsa <strong>Sí</strong> en el aviso.</li>
+            <li>Pega el comando con clic derecho y pulsa <kbd>Enter</kbd>.</li>
+          </ol>
+        </article>
+        <article class="basic-card">
+          <span class="basic-number">2</span>
+          <h3>Crea un punto de restauración</h3>
+          <p>Es como una foto de Windows a la que volver si algo sale mal. Tus documentos no se ven afectados.</p>
+          <ol>
+            <li>Pulsa <kbd>Windows</kbd> y escribe <strong>Crear un punto de restauración</strong>.</li>
+            <li>Pulsa <strong>Crear…</strong>, ponle un nombre y acepta.</li>
+          </ol>
+        </article>
+        <article class="basic-card">
+          <span class="basic-number">3</span>
+          <h3>Guarda tu trabajo y ve paso a paso</h3>
+          <p>Sigue los pasos en orden y comprueba después de cada uno si el error desaparece. Lee siempre los avisos marcados en naranja.</p>
+          <p class="basic-tip">Si un paso no lo entiendes, sáltalo y pide ayuda: es mejor que arriesgarse.</p>
+        </article>
+      </div>
+    </section>
   </main>
+
+  <footer class="shell footer">
+    <span>NoMore Errors · Asistente de errores de Windows</span>
+    <span>Las guías marcadas como «Generada con IA» no han sido revisadas por una persona.</span>
+  </footer>
+
+  <script src="guides.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

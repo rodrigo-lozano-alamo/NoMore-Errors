@@ -7,7 +7,7 @@ import re
 import sqlite3
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from PIL import Image, UnidentifiedImageError
@@ -22,7 +22,7 @@ from app.schemas.solutions import (
     SolutionResponse,
     SolutionSearchRequest,
 )
-from app.services.feedback_service import record_feedback
+from app.services.feedback_service import get_effectiveness, record_feedback
 from app.services.solution_service import build_solution
 
 
@@ -56,7 +56,8 @@ WINDOWS_ERROR_NAME_PATTERN = re.compile(
     r"\b(?:CRITICAL_PROCESS_DIED|KERNEL_SECURITY_CHECK_FAILURE|"
     r"SYSTEM_SERVICE_EXCEPTION|IRQL_NOT_LESS_OR_EQUAL|"
     r"PAGE_FAULT_IN_NONPAGED_AREA|INACCESSIBLE_BOOT_DEVICE|"
-    r"DPC_WATCHDOG_VIOLATION|MEMORY_MANAGEMENT)\b",
+    r"DPC_WATCHDOG_VIOLATION|MEMORY_MANAGEMENT|VIDEO_TDR_FAILURE|"
+    r"DNS_PROBE_FINISHED_NXDOMAIN|MSVCP140\.DLL|VCRUNTIME140(?:_1)?\.DLL)\b",
     re.IGNORECASE,
 )
 
@@ -79,6 +80,13 @@ class ErrorAnalysisResponse(BaseModel):
     confidence: float
     steps: list[str]
     sources: list[str]
+
+
+class FeedbackStatsResponse(BaseModel):
+    """Métrica de efectividad de una solución concreta."""
+
+    effectiveness_percentage: float | None
+    total_votes: int
 
 
 class OcrResponse(BaseModel):
@@ -226,4 +234,22 @@ def submit_feedback(request: FeedbackRequest) -> FeedbackResponse:
         effectiveness_percentage=metrics["effectiveness_percentage"],
         total_votes=metrics["total_votes"],
         message="Gracias por tu respuesta.",
+    )
+
+
+@app.get("/api/feedback/stats", response_model=FeedbackStatsResponse)
+def feedback_stats(
+    error_code: str = Query(..., min_length=2, max_length=120),
+    solution_id: str = Query(..., min_length=4, max_length=80),
+) -> FeedbackStatsResponse:
+    """Devuelve la efectividad actual de una solución sin registrar votos."""
+
+    try:
+        metrics = get_effectiveness(error_code.strip().upper(), solution_id)
+    except (OSError, sqlite3.Error) as error:
+        logger.exception("No se pudo leer el feedback", exc_info=error)
+        raise HTTPException(status_code=503, detail="No pudimos leer los votos ahora mismo.") from error
+    return FeedbackStatsResponse(
+        effectiveness_percentage=metrics["effectiveness_percentage"],
+        total_votes=metrics["total_votes"],
     )
